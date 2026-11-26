@@ -45,7 +45,23 @@ Atau di Windows: klik dua kali `start.cmd`.
   ```
 - Hasil pencarian YouTube Music berbeda-beda antar request (A/B testing), karena itu ada cache.
 
-## Tes UI
+## Deploy
+
+Butuh **host long-running**: `server.mjs` menjalankan `yt-dlp` sebagai proses Python
+dan mem-proxy stream. Vercel/Netlify **tidak bisa** (tanpa yt-dlp, ada batas eksekusi,
+dan URL `googlevideo` terikat IP sehingga proxy harus menetap).
+
+```bash
+docker build -t ruelzmusify-web .
+docker run -p 7788:7788 ruelzmusify-web
+```
+
+Port diambil dari `process.env.PORT` (default `7788`), jadi platform yang menyuntik
+`PORT` langsung jalan. Image sudah memuat `python3`, `ffmpeg`, dan `yt-dlp`.
+
+Render / Railway / Fly.io: pilih deploy dari `Dockerfile`, lalu buka port sesuai
+`PORT` yang diberikan platform.
+
 
 Menjalankan 22 screenshot (desktop, tablet, HP, plus cold start tanpa riwayat) dan menyimpan screenshot:
 
@@ -68,6 +84,7 @@ public/glass.css        Lapisan glassmorphism: material dock/kartu/sheet, lirik,
 public/app.js           Logika pemutar, antrean, pencarian, likes, lirik, equalizer
 ui-test.mjs             Tes Playwright multi-device
 start.cmd               Launcher Windows
+Dockerfile              Image deploy (node + python3 + yt-dlp)
 ```
 
 ### Kenapa token-nya begitu

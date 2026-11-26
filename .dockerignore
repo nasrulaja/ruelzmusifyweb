@@ -1,0 +1,12 @@
+node_modules
+.git
+.gitignore
+.github
+ui-*.png
+shot-*.png
+debug-*.png
+*.log
+*.err
+.env
+.DS_Store
+README.md
