@@ -1,9 +1,0 @@
-Add Docker deploy setup
-
-The player shells out to yt-dlp and proxies the audio stream, so it needs a
-long-running host rather than a static or serverless one.
-
-- Dockerfile: node 20 + python3 + ffmpeg + yt-dlp, runs as non-root, drops
-  dev dependencies, takes PORT from the platform
-- .dockerignore keeps node_modules, screenshots and logs out of the image
-- README: deploy notes and the reason Vercel/Netlify cannot host this
