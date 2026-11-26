@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#ed5564" />
+<title>RuelzMusify</title>
+<link rel="stylesheet" href="/tokens.css" />
+<link rel="stylesheet" href="/layout.css" />
+<link rel="stylesheet" href="/components.css" />
+<link rel="stylesheet" href="/dock.css" />
+<link rel="stylesheet" href="/player.css" />
+<link rel="stylesheet" href="/glass.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ floating dock: mini player + nav (fused) ============ -->
+  <div class="dock" id="dock">
+
+    <div class="mini hidden" id="mini">
+      <div class="mini-progress" id="miniProgress"></div>
+      <div class="mini-inner">
+        <img class="mini-art" id="miniArt" alt="" />
+        <div class="mini-text" id="miniMeta">
+          <div class="mini-title" id="miniTitle">&mdash;</div>
+          <div class="mini-artist" id="miniArtist">&mdash;</div>
+        </div>
+        <div class="mini-actions">
+          <button class="mini-btn" id="miniLike" title="Suka">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.7-7 9-7 9z"/></svg>
+          </button>
+          <button class="mini-btn" id="miniToggle" title="Play/Pause">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="ic-play"><path d="M8 5.5v13L19 12z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" class="ic-pause hidden"><rect x="7" y="5" width="3.6" height="14" rx="1.2"/><rect x="13.4" y="5" width="3.6" height="14" rx="1.2"/></svg>
+          </button>
+          <button class="mini-btn" id="miniNext" title="Berikutnya">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5.5v13L15.5 12z"/><rect x="16.5" y="5" width="2.5" height="14" rx="1.2"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav" aria-label="Navigasi utama">
+      <div class="nav-items">
+        <button class="nav-item active" data-view="home">
+          <span class="nav-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 10.6 12 4l8.5 6.6"/><path d="M5.8 9.4V20h12.4V9.4"/></svg>
+          </span>
+          <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" data-view="search">
+          <span class="nav-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.6"/><path d="M19.6 19.6l-4.3-4.3"/></svg>
+          </span>
+          <span class="nav-label">Search</span>
+        </button>
+        <button class="nav-item" data-view="library">
+          <span class="nav-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5v14"/><path d="M9 5v14"/><path d="M14.2 5.4 19 18.4"/></svg>
+          </span>
+          <span class="nav-label">Library</span>
+        </button>
+      </div>
+    </nav>
+  </div>
+
+
+  <!-- ============ main scroll area ============ -->
+  <main class="main-scroll" id="scroller">
+
+    <!-- ---------- HOME ---------- -->
+    <section class="feed" id="view-home">
+      <header class="appbar">
+        <h1 class="appbar-title">RuelzMusify</h1>
+        <button class="icon-btn" id="btnQueueTop" title="Antrean">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h11M4 12h11M4 17h7"/><circle cx="17" cy="16.5" r="2.2"/><path d="M19.2 16.5V8.5l2.3-.9"/></svg>
+        </button>
+      </header>
+
+      <div class="chips" id="chips"></div>
+
+      <div id="home-quickpicks"></div>
+
+      <div id="home-seed" class="hidden"></div>
+
+      <div id="home-recent-wrap" class="hidden">
+        <div class="section-head">
+          <h2 class="section-title">Keep listening</h2>
+        </div>
+        <div class="shelf" id="home-recent"></div>
+      </div>
+
+      <div id="home-liked-wrap" class="hidden">
+        <div class="section-head">
+          <h2 class="section-title">Disukai</h2>
+          <button class="section-action" data-goto="library" title="Lihat semua">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13"/><path d="M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+        <div class="shelf" id="home-liked"></div>
+      </div>
+
+      <div id="home-idle" class="empty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+        </div>
+        <div class="empty-text">Mau dengerin apa hari ini?</div>
+        <button class="btn-primary" data-goto="search">Cari musik</button>
+      </div>
+    </section>
+
+    <!-- ---------- SEARCH ---------- -->
+    <section class="feed hidden" id="view-search">
+      <header class="appbar">
+        <div class="searchbar">
+          <svg class="searchbar-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.6"/><path d="M19.6 19.6l-4.3-4.3"/></svg>
+          <input id="q" type="search" placeholder="Lagu, artis, atau album" autocomplete="off" enterkeyhint="search" />
+          <button class="searchbar-clear hidden" id="clearQ" title="Hapus">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <div id="search-empty" class="empty">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10.8" cy="10.8" r="6.6"/><path d="M19.6 19.6l-4.3-4.3"/></svg>
+        </div>
+        <div class="empty-text">Cari musik apa?</div>
+      </div>
+
+      <div id="results" class="list hidden"></div>
+    </section>
+
+    <!-- ---------- LIBRARY ---------- -->
+    <section class="feed hidden" id="view-library">
+      <header class="appbar">
+        <h1 class="appbar-title">Library</h1>
+      </header>
+
+      <div class="chips" id="lib-chips">
+        <button class="chip active" data-lib="liked">Disukai</button>
+        <button class="chip" data-lib="recent">Terakhir diputar</button>
+        <button class="chip" data-lib="queue">Antrean</button>
+      </div>
+
+      <div class="list" id="library"></div>
+
+      <div id="library-empty" class="empty hidden">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.7-7 9-7 9z"/></svg>
+        </div>
+        <div class="empty-text">Belum ada yang disukai</div>
+        <button class="btn-primary" data-goto="search">Cari musik</button>
+      </div>
+    </section>
+
+  </main>
+
+
+  <!-- ============ full player ============ -->
+  <div class="fp" id="full">
+    <div class="fp-bg" id="fpBg"></div>
+    <div class="fp-mask"></div>
+
+    <div class="fp-content">
+      <div class="fp-top">
+        <button class="fp-icon-btn" id="fpClose" title="Tutup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="fp-context">
+          <span class="fp-context-from">Diputar dari</span>
+          <span class="fp-context-source" id="fpSource">Antrean</span>
+        </div>
+        <button class="fp-icon-btn" id="fpQueueBtn" title="Antrean">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h11M4 12h11M4 17h7"/><circle cx="17" cy="16.5" r="2.2"/><path d="M19.2 16.5V8.5l2.3-.9"/></svg>
+        </button>
+      </div>
+
+      <div class="fp-art-wrap">
+        <img class="fp-art" id="fpArt" alt="" />
+      </div>
+
+      <div class="fp-rest">
+        <div class="fp-head">
+          <div class="fp-title-wrap">
+            <div class="fp-title" id="fpTitle">&mdash;</div>
+            <div class="fp-artist" id="fpArtist">&mdash;</div>
+          </div>
+          <button class="fp-icon-btn" id="fpLike" title="Suka">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.7-7 9-7 9z"/></svg>
+          </button>
+        </div>
+
+        <div class="fp-seek">
+          <div class="fp-slider" id="slider">
+            <div class="fp-track">
+              <div class="fp-fill" id="fpFill"></div>
+              <div class="fp-knob" id="fpKnob" style="left:0"></div>
+            </div>
+          </div>
+          <div class="fp-times">
+            <span id="cur">0:00</span>
+            <span id="dur">0:00</span>
+          </div>
+        </div>
+
+        <div class="fp-controls">
+          <button class="fp-ctrl" id="shuffleBtn" title="Acak">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h4v4"/><path d="M4 20 20 4"/><path d="M16 20h4v-4"/><path d="M4 4l4.5 4.5"/><path d="M15.5 15.5 20 20"/></svg>
+          </button>
+          <button class="fp-ctrl" id="prev" title="Sebelumnya">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5.5v13L15.5 12z"/><rect x="16.5" y="5" width="2.5" height="14" rx="1.2"/></svg>
+          </button>
+          <button class="fp-play" id="toggle" title="Play/Pause">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="ic-play"><path d="M8 5.5v13L19 12z"/></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" class="ic-pause hidden"><rect x="7" y="5" width="3.6" height="14" rx="1.2"/><rect x="13.4" y="5" width="3.6" height="14" rx="1.2"/></svg>
+          </button>
+          <button class="fp-ctrl" id="next" title="Berikutnya">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5.5v13L15.5 12z"/><rect x="16.5" y="5" width="2.5" height="14" rx="1.2"/></svg>
+          </button>
+          <button class="fp-ctrl" id="repeatBtn" title="Ulang">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3l3 3-3 3"/><path d="M20 6H8a4 4 0 0 0-4 4"/><path d="M7 21l-3-3 3-3"/><path d="M4 18h12a4 4 0 0 0 4-4"/></svg>
+          </button>
+        </div>
+
+        <div class="fp-bottom">
+          <button class="fp-icon-btn" id="volBtn" title="Volume">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18V6L7.5 9.5H4z"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6"/></svg>
+          </button>
+          <button class="fp-icon-btn" id="lyricsBtn" title="Lirik">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h11M4 11h11M4 16h7"/><path d="M17.5 14.5c1.2 0 2 .7 2 1.8 0 1.6-1.4 2.2-2 3.7-.6-1.5-2-2.1-2-3.7 0-1.1.8-1.8 2-1.8z"/></svg>
+          </button>
+          <button class="fp-icon-btn" id="eqBtn" title="Equalizer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 4v6M6 14v6"/><path d="M12 4v10M12 18v2"/><path d="M18 4v2M18 10v10"/><circle cx="6" cy="12" r="2"/><circle cx="12" cy="16" r="2"/><circle cx="18" cy="8" r="2"/></svg>
+          </button>
+          <button class="fp-icon-btn" id="queueBottom" title="Antrean">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h11M4 12h11M4 17h7"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ lyrics panel ============ -->
+  <div class="sheet" id="lyricsSheet" aria-hidden="true">
+    <div class="sheet-backdrop" data-close="lyrics"></div>
+    <div class="sheet-panel">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head">
+        <h2 class="sheet-title">Lirik</h2>
+        <button class="fp-icon-btn" data-close="lyrics" title="Tutup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+      <div class="lyrics-body" id="lyricsBody">
+        <div class="lyrics-loading"><span class="spinner"></span></div>
+      </div>
+      <div class="lyrics-foot" id="lyricsFoot">Sumber: lyrics.ovh</div>
+    </div>
+  </div>
+
+  <!-- ============ equalizer sheet ============ -->
+  <div class="sheet" id="eqSheet" aria-hidden="true">
+    <div class="sheet-backdrop" data-close="eq"></div>
+    <div class="sheet-panel">
+      <div class="sheet-grab"></div>
+      <div class="sheet-head">
+        <h2 class="sheet-title">Equalizer</h2>
+        <button class="fp-icon-btn" data-close="eq" title="Tutup">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+        </button>
+      </div>
+
+      <div class="eq-presets" id="eqPresets"></div>
+
+      <div class="eq-bands" id="eqBands"></div>
+
+      <div class="eq-row">
+        <span class="eq-label">Bass boost</span>
+        <input class="eq-slider" id="eqBass" type="range" min="0" max="12" step="1" value="0" />
+      </div>
+
+      <div class="eq-row">
+        <span class="eq-label">Volume</span>
+        <input class="eq-slider" id="eqVolume" type="range" min="0" max="1" step="0.01" value="0.85" />
+      </div>
+
+      <button class="btn-primary eq-reset" id="eqReset">Reset</button>
+      <p class="eq-note">
+        Equalizer memakai Web Audio API, jadi hanya memengaruhi pemutaran di tab ini.
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<input id="vol" type="range" min="0" max="1" step="0.01" value="0.85" class="hidden" />
+<audio id="audio" preload="none"></audio>
+<script src="/app.js"></script>
+</body>
+</html>

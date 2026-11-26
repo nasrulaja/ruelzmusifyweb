@@ -1,0 +1,394 @@
+/* ============================================================
+   Full player — bottom sheet, expands from the mini player
+   APK: ui/player/Player.kt
+   ============================================================ */
+
+.fp {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-container-lowest);
+  transform: translateY(100%);
+  transition: transform var(--dur-slow) var(--ease-expressive);
+  will-change: transform;
+  overscroll-behavior: contain;
+}
+
+.fp.open {
+  transform: none;
+}
+
+/* artwork-derived backdrop */
+.fp-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(72px) saturate(180%);
+  opacity: 0.75;
+  transform: scale(1.2);
+  z-index: 0;
+}
+
+.fp-mask {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    radial-gradient(
+      120% 90% at 50% 0%,
+      rgb(0 0 0 / 0.18) 0%,
+      rgb(0 0 0 / 0.55) 55%,
+      rgb(0 0 0 / 0.82) 100%
+    ),
+    linear-gradient(180deg, rgb(0 0 0 / 0.28) 0%, rgb(0 0 0 / 0.72) 100%);
+}
+
+.fp-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: var(--safe-t) 0 var(--safe-b);
+  color: #fff;
+}
+
+/* ---------------- top bar ---------------- */
+
+.fp-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 60px;
+  padding: 0 8px;
+  flex: none;
+}
+
+.fp-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: rgb(255 255 255 / 0.92);
+  transition: background var(--dur-fast) var(--ease-expressive);
+  flex: none;
+}
+
+.fp-icon-btn:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+
+.fp-icon-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.fp-context {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0 8px;
+}
+
+.fp-context-from {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  opacity: 0.62;
+}
+
+.fp-context-source {
+  font-size: 12.5px;
+  font-weight: 600;
+  opacity: 0.92;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* hide the layer when closed so it cannot swallow taps */
+.fp:not(.open) {
+  pointer-events: none;
+  visibility: hidden;
+  transition: transform var(--dur-slow) var(--ease-expressive),
+    visibility 0s linear var(--dur-slow);
+}
+
+.fp.open {
+  visibility: visible;
+  transition: transform var(--dur-slow) var(--ease-expressive), visibility 0s;
+}
+
+/* ---------------- artwork ---------------- */
+
+.fp-art-wrap {
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  padding: 8px 24px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* scale up to the available box instead of stopping at the thumbnail's
+   natural size, and stay square on whichever axis is smaller */
+.fp-art {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: 0 16px 48px rgb(0 0 0 / 0.5);
+  background: rgb(255 255 255 / 0.08);
+}
+
+.fp-rest {
+  display: block;
+  flex: none;
+}
+
+/* ---------------- title row ---------------- */
+
+.fp-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 24px 4px;
+  flex: none;
+}
+
+.fp-title-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fp-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fp-artist {
+  font-size: 13.5px;
+  opacity: 0.76;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------------- seek bar ---------------- */
+
+.fp-seek {
+  padding: 8px 24px 0;
+  flex: none;
+}
+
+.fp-slider {
+  position: relative;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.fp-track {
+  position: relative;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.26);
+}
+
+.fp-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: 2px;
+  background: #fff;
+  width: 0;
+}
+
+.fp-knob {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 999px;
+  background: #fff;
+  transform: translateY(-50%);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.4);
+  transition: width 120ms ease, height 120ms ease;
+}
+
+.fp-slider.dragging .fp-knob {
+  width: 16px;
+  height: 16px;
+  margin-left: -8px;
+}
+
+.fp-times {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.68;
+  margin-top: 2px;
+}
+
+
+/* ---------------- transport ---------------- */
+
+.fp-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 4px 20px 8px;
+  flex: none;
+}
+
+.fp-ctrl {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  color: #fff;
+  transition: background var(--dur-fast) var(--ease-expressive),
+    transform var(--dur-fast) var(--ease-expressive);
+  flex: none;
+}
+
+.fp-ctrl:hover {
+  background: rgb(255 255 255 / 0.14);
+}
+
+.fp-ctrl:active {
+  transform: scale(0.92);
+}
+
+.fp-ctrl svg {
+  width: 26px;
+  height: 26px;
+}
+
+.fp-ctrl.on {
+  color: var(--primary);
+}
+
+.fp-play {
+  width: 68px;
+  height: 68px;
+  border-radius: 999px;
+  background: #fff;
+  color: #101010;
+  display: grid;
+  place-items: center;
+  flex: none;
+  transition: transform var(--dur-fast) var(--ease-expressive);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.35);
+}
+
+.fp-play:active {
+  transform: scale(0.94);
+}
+
+.fp-play svg {
+  width: 32px;
+  height: 32px;
+}
+
+/* ---------------- bottom action row ---------------- */
+
+.fp-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 4px 16px 12px;
+  flex: none;
+}
+
+/* short landscape: artwork beside the controls */
+@media (max-height: 560px) and (orientation: landscape) {
+  .fp-content {
+    flex-direction: row;
+    align-items: center;
+    padding: 0 16px;
+    gap: 16px;
+  }
+
+  .fp-top {
+    display: none;
+  }
+
+  .fp-art-wrap {
+    flex: 0 0 42%;
+    padding: 12px;
+  }
+
+  .fp-rest {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  /* keep the player a centred column instead of stretching edge-to-edge */
+  .fp-content {
+    max-width: 560px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .fp-art-wrap {
+    padding: 8px;
+    flex: 0 1 auto;
+    min-height: 0;
+    min-width: 0;
+    /* square art box: width is the binding axis in a 560px column */
+    aspect-ratio: 1 / 1;
+    max-height: 62%;
+    margin-bottom: 10px;
+  }
+
+  /* 16:9 source cropped to a square loses the top/bottom of the cover,
+     so bias the crop upward — cover art usually keeps its title there */
+  .fp-art {
+    object-position: center 38%;
+  }
+
+  /* the wrap is a tall, narrow column: a square sized by height would
+     overflow the width, and one sized by width leaves a void above the
+     title. The base rule (auto/auto + max 100% + aspect-ratio) already
+     fits the square into the smaller axis — don't override it here. */
+
+  .fp-head,
+  .fp-seek,
+  .fp-controls,
+  .fp-bottom {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}

@@ -1,0 +1,8 @@
+node_modules/
+*.log
+*.err
+ui-*.png
+shot-*.png
+debug-*.png
+.env
+.DS_Store

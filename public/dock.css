@@ -1,0 +1,341 @@
+/* ============================================================
+   Floating dock = mini player + navigation bar, fused.
+   APK: MiniPlayer.kt + FloatingNavigationToolbar.kt
+   When both are visible the junction corners go 12px and the two
+   surfaces read as one pill.
+   ============================================================ */
+
+.dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 var(--nav-h-padding) calc(var(--nav-b-padding) + var(--safe-b));
+  pointer-events: none;
+}
+
+.dock > * {
+  pointer-events: auto;
+  width: 100%;
+  max-width: var(--nav-max-width);
+}
+
+/* ---------------- mini player ---------------- */
+
+.mini {
+  position: relative;
+  height: var(--mini-height);
+  margin-bottom: var(--mini-bottom-spacing);
+  border-radius: var(--radius-standalone) var(--radius-standalone)
+    var(--radius-junction) var(--radius-junction);
+  background: var(--surface-container);
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.14), 0 8px 28px rgb(0 0 0 / 0.12);
+  transition: border-radius var(--dur-med) var(--ease-expressive);
+}
+
+.mini-progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 0;
+  background: var(--primary);
+  border-radius: 0 1px 1px 0;
+  transition: width 200ms linear;
+  z-index: 2;
+}
+
+.mini-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 100%;
+  padding: 0 6px 0 8px;
+}
+
+.mini-art {
+  width: 54px;
+  height: 54px;
+  border-radius: var(--thumb-list-radius);
+  object-fit: cover;
+  background: var(--surface-container-high);
+  flex: none;
+}
+
+.mini-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+}
+
+.mini-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--on-surface);
+}
+
+.mini-artist {
+  font-size: 12px;
+  color: var(--on-surface-variant);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.mini-btn {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  color: var(--on-surface);
+  transition: background var(--dur-fast) var(--ease-expressive);
+}
+
+.mini-btn:hover {
+  background: var(--surface-container-highest);
+}
+
+.mini-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+.mini-btn.liked {
+  color: var(--primary);
+}
+
+.mini-btn.liked svg {
+  fill: currentColor;
+}
+
+/* ---------------- navigation bar ---------------- */
+
+.nav {
+  position: relative;
+  height: var(--nav-height);
+  border-radius: var(--radius-outer);
+  background: var(--surface-container);
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgb(0 0 0 / 0.14), 0 8px 28px rgb(0 0 0 / 0.12);
+  transition: border-radius var(--dur-med) var(--ease-expressive);
+}
+
+/* fused state: mini player sits directly above the bar */
+.dock.fused .nav {
+  border-radius: var(--radius-junction) var(--radius-junction)
+    var(--radius-outer) var(--radius-outer);
+}
+
+.dock.fused .mini {
+  border-radius: var(--radius-outer) var(--radius-outer)
+    var(--radius-junction) var(--radius-junction);
+}
+
+.nav-items {
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  padding: 4px 6px;
+}
+
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 999px;
+  color: var(--on-surface-variant);
+  padding: 4px 0;
+  transition: color var(--dur-fast) var(--ease-expressive);
+  min-width: 0;
+}
+
+/* active indicator pill, Material 3 ShortNavigationBar style */
+.nav-pill {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 32px;
+  border-radius: 999px;
+  background: transparent;
+  transition: background var(--dur-med) var(--ease-expressive);
+}
+
+.nav-item svg {
+  width: 22px;
+  height: 22px;
+}
+
+.nav-item.active {
+  color: var(--on-surface);
+}
+
+.nav-item.active .nav-pill {
+  background: var(--secondary-container);
+  color: var(--on-secondary-container);
+}
+
+.nav-label {
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.nav-item.active .nav-label {
+  font-weight: 700;
+}
+
+/* ============================================================
+   Desktop: the same dock turns into a left rail
+   ============================================================ */
+
+@media (min-width: 1024px) {
+  #app {
+    grid-template-columns: 264px 1fr;
+  }
+
+  .dock {
+    position: static;
+    grid-column: 1;
+    grid-row: 1;
+    align-self: stretch;
+    padding: 0;
+    gap: 8px;
+    /* nav sits at the top of the rail, mini player at the bottom */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    border-right: 1px solid var(--outline-variant);
+    background: var(--surface-container-low);
+    pointer-events: auto;
+  }
+
+  .dock > * {
+    max-width: none;
+  }
+
+  .nav {
+    order: -1;
+    margin: 12px;
+    height: auto;
+    border-radius: 20px;
+    box-shadow: none;
+    background: transparent;
+    overflow: visible;
+  }
+
+  .nav-items {
+    flex-direction: column;
+    padding: 0;
+    gap: 2px;
+  }
+
+  .nav-item {
+    flex: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 14px;
+    height: 60px;
+    padding: 0 16px;
+    border-radius: 999px;
+    font-size: 15px;
+  }
+
+  .nav-pill {
+    width: 34px;
+    height: 34px;
+    background: transparent;
+  }
+
+  /* icons were 22px inside a 28px pill — barely readable on a desktop rail */
+  .nav-pill svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .nav-item.active {
+    background: var(--secondary-container);
+    color: var(--on-secondary-container);
+  }
+
+  .nav-item.active .nav-pill {
+    background: transparent;
+    color: var(--primary);
+  }
+
+  .nav-label {
+    font-size: 15px;
+  }
+
+  .mini {
+    order: 0;
+    margin: auto 12px calc(var(--nav-b-padding) + 8px);
+    border-radius: 20px;
+    box-shadow: none;
+    border: 1px solid var(--outline-variant);
+    height: var(--mini-height);
+    flex: none;
+  }
+
+  /* the rail is narrow — drop the like button so the title can breathe */
+  .mini-actions .mini-btn#miniLike {
+    display: none;
+  }
+
+  .mini-inner {
+    padding: 0 4px 0 6px;
+    gap: 8px;
+  }
+
+  .mini-art {
+    width: 48px;
+    height: 48px;
+  }
+
+  /* bigger tap targets on the rail */
+  .mini-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .mini-btn svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .dock.fused .mini,
+  .dock.fused .nav {
+    border-radius: 20px;
+  }
+
+  .main-scroll {
+    grid-column: 2;
+    padding-bottom: 40px;
+  }
+}

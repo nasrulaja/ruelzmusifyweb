@@ -1,0 +1,230 @@
+/* ============================================================
+   Shell layout
+   Mobile : content + floating dock (mini player + nav fused)
+   Desktop: nav dock becomes a left rail, same tokens
+   ============================================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--surface);
+  color: var(--on-surface);
+  font-family: 'Inter', 'Roboto', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+input {
+  font: inherit;
+  color: inherit;
+  border: 0;
+  background: none;
+  outline: none;
+}
+
+/* inline SVG icons must never inherit huge dimensions */
+svg {
+  display: block;
+  flex: none;
+}
+svg:not([width]):not([height]) {
+  width: 1em;
+  height: 1em;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ---------------- app shell ---------------- */
+
+#app {
+  display: grid;
+  grid-template-rows: 1fr;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.main-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--outline-variant) transparent;
+  height: 100%;
+  padding-bottom: calc(var(--mini-height) + var(--nav-height) + 26px + var(--safe-b));
+}
+
+.main-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.main-scroll::-webkit-scrollbar-thumb {
+  background: var(--outline-variant);
+  border-radius: 3px;
+}
+
+.feed {
+  width: 100%;
+  max-width: var(--feed-max);
+  margin: 0 auto;
+  padding: 0 0 8px;
+}
+
+/* ---------------- top app bar ---------------- */
+
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--appbar-height);
+  padding: 0 8px 0 20px;
+  padding-top: var(--safe-t);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+}
+
+.appbar-title {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  color: var(--on-surface-variant);
+  transition: background var(--dur-fast) var(--ease-expressive),
+    color var(--dur-fast) var(--ease-expressive);
+  flex: none;
+}
+
+.icon-btn:hover {
+  background: var(--surface-container-high);
+  color: var(--on-surface);
+}
+
+.icon-btn:active {
+  background: var(--surface-container-highest);
+}
+
+.icon-btn svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* ---------------- search bar (SearchBar.kt) ---------------- */
+
+.searchbar {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 6px 0 16px;
+  border-radius: 999px;
+  background: var(--surface-container-high);
+  min-width: 0;
+}
+
+.searchbar-ic {
+  width: 20px;
+  height: 20px;
+  color: var(--on-surface-variant);
+  flex: none;
+}
+
+.searchbar input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  font-size: 15px;
+  color: var(--on-surface);
+  background: none;
+}
+
+.searchbar input::placeholder {
+  color: var(--on-surface-variant);
+}
+
+/* kill the native search cancel button — we render our own */
+.searchbar input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.searchbar-clear {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  color: var(--on-surface-variant);
+  flex: none;
+}
+
+.searchbar-clear:hover {
+  background: var(--surface-container-highest);
+}
+
+.searchbar-clear svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------------- filled button (ButtonDefaults.shapes) ---------------- */
+
+.btn-primary {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter var(--dur-fast) var(--ease-expressive),
+    transform var(--dur-fast) var(--ease-expressive);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+

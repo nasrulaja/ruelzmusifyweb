@@ -1,0 +1,23 @@
+{
+  "name": "ruelzmusify-web",
+  "version": "1.0.0",
+  "description": "Pemutar YouTube Music di browser lokal",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "test:ui": "node ui-test.mjs"
+  },
+  "keywords": [],
+  "author": "ruelzexe",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.3.0",
+    "youtubei.js": "^18.3.0",
+    "yt-dlp-exec": "^1.0.2"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.1"
+  }
+}

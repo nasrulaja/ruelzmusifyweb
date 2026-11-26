@@ -1,0 +1,1099 @@
+/* ============================================================
+   RuelzMusify Web — liquid glass layer
+   Inspired by iOS 26 / visionOS materials. Loaded last so it
+   overrides the flat Material surfaces without touching layout.
+
+   Layers of a real glass panel, top to bottom:
+     1. blurred, saturated backdrop   (backdrop-filter)
+     2. a faint inner wash            (gradient)
+     3. a 1px specular edge           (inset 0 1px 0 highlight)
+     4. a border that catches light   (1px solid, low alpha)
+     5. a cast shadow for depth       (box-shadow)
+   ============================================================ */
+
+:root {
+  --glass-blur: 28px;
+  --glass-sat: 180%;
+  --glass-tint: 255 255 255;
+  --glass-fill: 0.055;
+  --glass-fill-strong: 0.085;
+  --glass-border: 0.12;
+  --glass-highlight: 0.16;
+  --glass-shadow: 0 18px 50px -12px rgba(0, 0, 0, 0.55), 0 4px 14px -6px rgba(0, 0, 0, 0.4);
+  --glass-inner: inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight)),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.14);
+  --glass-radius: 26px;
+}
+
+/* light mode glass needs a dark tint and softer shadow, or it turns milky */
+[data-theme='light'] {
+  --glass-tint: 255 255 255;
+  --glass-fill: 0.42;
+  --glass-fill-strong: 0.56;
+  --glass-border: 0.5;
+  --glass-highlight: 0.9;
+  --glass-shadow: 0 18px 44px -16px rgba(90, 40, 44, 0.28), 0 3px 10px -4px rgba(90, 40, 44, 0.16);
+  --glass-inner: inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight)),
+    inset 0 -1px 0 rgba(120, 60, 64, 0.06);
+}
+
+/* ------------------------------------------------------------
+   the glass primitive
+   ------------------------------------------------------------ */
+.glass,
+.dock,
+.mini,
+.fp-top,
+.chip,
+.searchbar,
+.qp-card,
+.row {
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+}
+
+/* ------------------------------------------------------------
+   ambient light — a slow rose/plum aurora behind everything,
+   so the glass has something worth blurring
+   ------------------------------------------------------------ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: -20%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 32% at 18% 12%, rgba(237, 85, 100, 0.34), transparent 70%),
+    radial-gradient(34% 30% at 82% 26%, rgba(126, 87, 194, 0.3), transparent 72%),
+    radial-gradient(40% 36% at 62% 88%, rgba(0, 150, 199, 0.22), transparent 74%),
+    radial-gradient(30% 28% at 10% 78%, rgba(255, 138, 101, 0.2), transparent 72%);
+  filter: blur(28px);
+  animation: aurora 26s ease-in-out infinite alternate;
+}
+
+[data-theme='light'] body::before {
+  background:
+    radial-gradient(38% 32% at 18% 12%, rgba(237, 85, 100, 0.22), transparent 70%),
+    radial-gradient(34% 30% at 82% 26%, rgba(149, 117, 205, 0.2), transparent 72%),
+    radial-gradient(40% 36% at 62% 88%, rgba(79, 195, 247, 0.18), transparent 74%),
+    radial-gradient(30% 28% at 10% 78%, rgba(255, 171, 145, 0.2), transparent 72%);
+  opacity: 0.9;
+}
+
+@keyframes aurora {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, 1.5%, 0) scale(1.06);
+  }
+  100% {
+    transform: translate3d(-1%, 2%, 0) scale(1.02);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before {
+    animation: none;
+  }
+}
+
+/* ------------------------------------------------------------
+   dock: the fused mini-player + nav pill
+   ------------------------------------------------------------ */
+.dock {
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--glass-tint), calc(var(--glass-fill-strong) + 0.02)),
+    rgba(var(--glass-tint), var(--glass-fill))
+  );
+  border: 1px solid rgba(var(--glass-tint), var(--glass-border));
+  box-shadow: var(--glass-shadow), var(--glass-inner);
+  /* soft halo so the dock reads as floating above the feed */
+  filter: none;
+}
+
+/* the glass edge glows slightly warmer where the rose accent sits */
+.dock::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, calc(var(--glass-highlight) * 1.6)) 0%,
+    transparent 26%,
+    transparent 74%,
+    rgba(237, 85, 100, 0.22) 100%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.75;
+}
+
+[data-theme='light'] .dock::after {
+  mix-blend-mode: normal;
+  opacity: 0.5;
+}
+
+/* mini player interior: barely-there plate, the dock already blurs */
+.mini {
+  background: rgba(var(--glass-tint), 0.05);
+  border: 1px solid rgba(var(--glass-tint), calc(var(--glass-border) * 0.7));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-highlight) * 0.8));
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+[data-theme='light'] .mini {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+/* progress hairline inside the mini player */
+.mini-progress {
+  background: linear-gradient(90deg, var(--primary), #ff8a9b);
+  box-shadow: 0 0 10px rgba(237, 85, 100, 0.7);
+}
+
+/* nav pill in the dock */
+.nav-pill {
+  transition: background var(--dur-fast) var(--ease-expressive),
+    box-shadow var(--dur-med) var(--ease-expressive);
+}
+
+.nav-item.active .nav-pill {
+  background: rgba(237, 85, 100, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(237, 85, 100, 0.35), 0 4px 16px -6px rgba(237, 85, 100, 0.6);
+}
+
+[data-theme='light'] .nav-item.active .nav-pill {
+  background: rgba(237, 85, 100, 0.14);
+}
+
+/* ------------------------------------------------------------
+   top app bar + search: a floating glass slab
+   ------------------------------------------------------------ */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin: 0 -4px 4px;
+  padding: 10px 12px;
+  border-radius: 22px;
+  background: rgba(var(--glass-tint), var(--glass-fill));
+  border: 1px solid rgba(var(--glass-tint), calc(var(--glass-border) * 0.85));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight));
+  -webkit-backdrop-filter: blur(20px) saturate(170%);
+  backdrop-filter: blur(20px) saturate(170%);
+}
+
+.searchbar {
+  background: rgba(var(--glass-tint), var(--glass-fill-strong));
+  border: 1px solid rgba(var(--glass-tint), var(--glass-border));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight)), var(--glass-shadow);
+}
+
+.searchbar:focus-within {
+  border-color: rgba(237, 85, 100, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight)),
+    0 0 0 3px rgba(237, 85, 100, 0.18), var(--glass-shadow);
+}
+
+/* ------------------------------------------------------------
+   chips: small glass lozenges with a lit active state
+   ------------------------------------------------------------ */
+.chip {
+  background: rgba(var(--glass-tint), var(--glass-fill));
+  border: 1px solid rgba(var(--glass-tint), calc(var(--glass-border) * 0.9));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-highlight) * 0.9));
+  transition: background var(--dur-fast) var(--ease-expressive),
+    box-shadow var(--dur-fast) var(--ease-expressive), transform var(--dur-fast) var(--ease-expressive);
+}
+
+.chip:hover {
+  background: rgba(var(--glass-tint), calc(var(--glass-fill-strong) + 0.03));
+}
+
+.chip:active {
+  transform: scale(0.96);
+}
+
+.chip.active {
+  background: linear-gradient(140deg, rgba(237, 85, 100, 0.9), rgba(255, 128, 145, 0.78));
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 8px 22px -8px rgba(237, 85, 100, 0.85);
+}
+
+/* in light mode the rose fill is pale, so white text would vanish */
+[data-theme='light'] .chip.active {
+  background: linear-gradient(140deg, #e04457, #ef6b7c);
+  color: #fff;
+}
+
+
+/* ------------------------------------------------------------
+   cards: quick picks + grid items
+   ------------------------------------------------------------ */
+.qp-card {
+  background: rgba(var(--glass-tint), var(--glass-fill));
+  border: 1px solid rgba(var(--glass-tint), calc(var(--glass-border) * 0.8));
+  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-highlight) * 0.7));
+  transition: transform var(--dur-med) var(--ease-expressive), box-shadow var(--dur-med) var(--ease-expressive);
+}
+
+.qp-card:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow: 0 28px 60px -18px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.qp-card:active {
+  transform: translateY(-1px) scale(0.985);
+}
+
+/* the artwork sits under a glass sheen, like a laminated print */
+.qp-art {
+  transition: transform var(--dur-slow) var(--ease-expressive);
+}
+
+.qp-card:hover .qp-art {
+  transform: scale(1.06);
+}
+
+/* specular sweep across the card face */
+.qp-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    118deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.04) 22%,
+    transparent 46%
+  );
+  opacity: 0.75;
+}
+
+.qp-scrim {
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.82) 0%,
+    rgba(0, 0, 0, 0.45) 32%,
+    transparent 62%
+  );
+}
+
+/* the play affordance: frosted disc */
+.qp-play {
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 6px 18px -6px rgba(0, 0, 0, 0.6);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  backdrop-filter: blur(12px) saturate(180%);
+}
+
+.grid-item {
+  transition: transform var(--dur-med) var(--ease-expressive);
+}
+
+.grid-item:hover {
+  transform: translateY(-3px);
+}
+
+.grid-item:hover .grid-art,
+.grid-item:hover .row-art {
+  box-shadow: 0 18px 40px -14px rgba(0, 0, 0, 0.7);
+}
+
+.grid-art,
+.row-art {
+  box-shadow: 0 10px 26px -12px rgba(0, 0, 0, 0.6);
+  transition: box-shadow var(--dur-med) var(--ease-expressive);
+}
+
+/* ------------------------------------------------------------
+   list rows: glass strips that light up on hover
+   ------------------------------------------------------------ */
+.row {
+  position: relative;
+  border-radius: 18px;
+  border: 1px solid transparent;
+  transition: background var(--dur-fast) var(--ease-expressive),
+    border-color var(--dur-fast) var(--ease-expressive), transform var(--dur-fast) var(--ease-expressive);
+}
+
+.row:hover {
+  background: rgba(var(--glass-tint), var(--glass-fill));
+  border-color: rgba(var(--glass-tint), calc(var(--glass-border) * 0.7));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, calc(var(--glass-highlight) * 0.7));
+}
+
+.row:active {
+  transform: scale(0.994);
+}
+
+.row.is-playing {
+  background: linear-gradient(100deg, rgba(237, 85, 100, 0.2), rgba(237, 85, 100, 0.06));
+  border-color: rgba(237, 85, 100, 0.35);
+}
+
+/* ------------------------------------------------------------
+   wide screens: the results list is capped at 780px, so align the
+   search field to that same column — otherwise the field is 1160px
+   and the list floats off-centre beneath it.
+   ------------------------------------------------------------ */
+@media (min-width: 1024px) {
+  #results {
+    max-width: 780px;
+    margin-inline: auto;
+  }
+
+  /* keep the field above the list, same column and gutter */
+  .appbar:has(.searchbar) {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .appbar:has(.searchbar) > * {
+    max-width: 780px;
+    margin-inline: auto;
+    width: 100%;
+  }
+}
+
+[data-theme='light'] .row.is-playing {
+  background: linear-gradient(100deg, rgba(237, 85, 100, 0.16), rgba(237, 85, 100, 0.04));
+}
+
+/* ------------------------------------------------------------
+   full player: a liquid-glass sheet rising over the app
+   ------------------------------------------------------------ */
+.fp-bg {
+  filter: blur(60px) saturate(190%) brightness(0.55);
+  transform: scale(1.25);
+}
+
+[data-theme='light'] .fp-bg {
+  filter: blur(60px) saturate(190%) brightness(1.25);
+}
+
+.fp-mask {
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 6, 8, 0.35) 0%,
+    rgba(10, 6, 8, 0.62) 55%,
+    rgba(10, 6, 8, 0.78) 100%
+  );
+  -webkit-backdrop-filter: blur(26px) saturate(150%);
+  backdrop-filter: blur(26px) saturate(150%);
+}
+
+[data-theme='light'] .fp-mask {
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 252, 252, 0.74) 55%,
+    rgba(255, 250, 250, 0.86) 100%
+  );
+}
+
+.fp-content {
+  position: relative;
+}
+
+/* the sheet's own edge: a bright rim where the glass meets the light */
+.fp-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 30px 30px 0 0;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-bottom: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+[data-theme='light'] .fp-content::before {
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+
+/* artwork gets a real cast shadow so it floats above the frosted sheet */
+.fp-art {
+  border-radius: 24px;
+  box-shadow: 0 34px 70px -22px rgba(0, 0, 0, 0.8), 0 10px 26px -12px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transition: transform var(--dur-slow) var(--ease-expressive), box-shadow var(--dur-slow) var(--ease-expressive);
+}
+
+[data-theme='light'] .fp-art {
+  box-shadow: 0 30px 60px -20px rgba(90, 40, 44, 0.5), 0 8px 20px -10px rgba(90, 40, 44, 0.28),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+}
+
+/* transport controls: frosted circles */
+.fp-ctrl,
+.fp-icon-btn {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  transition: background var(--dur-fast) var(--ease-expressive),
+    transform var(--dur-fast) var(--ease-expressive), box-shadow var(--dur-fast) var(--ease-expressive);
+}
+
+[data-theme='light'] .fp-content {
+  color: #2a1a1d;
+}
+
+/* in light mode the frosted buttons are white, so the glyphs must be dark */
+[data-theme='light'] .fp-ctrl,
+[data-theme='light'] .fp-icon-btn {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(255, 255, 255, 0.95);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 4px 12px -6px rgba(90, 40, 44, 0.3);
+  color: #2a1a1d;
+}
+
+[data-theme='light'] .fp-ctrl:hover,
+[data-theme='light'] .fp-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.88);
+}
+
+/* the play button stays solid rose, so keep its glyph white */
+[data-theme='light'] .fp-play,
+.fp-play {
+  color: #fff;
+}
+
+[data-theme='light'] .fp-context-from,
+[data-theme='light'] .fp-artist {
+  opacity: 0.7;
+}
+
+[data-theme='light'] .fp-track {
+  background: rgba(90, 40, 44, 0.22);
+}
+
+.fp-ctrl:hover,
+.fp-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  transform: translateY(-1px);
+}
+
+.fp-ctrl:active,
+.fp-icon-btn:active {
+  transform: scale(0.94);
+}
+
+/* the play button: the one solid, glossy object on the sheet */
+.fp-play {
+  background: radial-gradient(circle at 32% 26%, #ff9aa7, #ed5564 62%, #c83e4d 100%);
+  box-shadow: 0 18px 40px -14px rgba(237, 85, 100, 0.95), 0 4px 12px -4px rgba(0, 0, 0, 0.5),
+    inset 0 2px 3px rgba(255, 255, 255, 0.5), inset 0 -3px 8px rgba(0, 0, 0, 0.24);
+  transition: transform var(--dur-fast) var(--ease-expressive), box-shadow var(--dur-med) var(--ease-expressive);
+}
+
+.fp-play:hover {
+  transform: scale(1.045);
+  box-shadow: 0 24px 52px -14px rgba(237, 85, 100, 1), 0 6px 16px -4px rgba(0, 0, 0, 0.55),
+    inset 0 2px 3px rgba(255, 255, 255, 0.6), inset 0 -3px 8px rgba(0, 0, 0, 0.24);
+}
+
+.fp-play:active {
+  transform: scale(0.96);
+}
+
+/* seek track: glass channel + glowing fill */
+.fp-track {
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme='light'] .fp-track {
+  background: rgba(90, 40, 44, 0.16);
+  box-shadow: inset 0 1px 2px rgba(90, 40, 44, 0.2);
+}
+
+.fp-fill {
+  background: linear-gradient(90deg, #ff8a9b, var(--primary));
+  box-shadow: 0 0 14px rgba(237, 85, 100, 0.8);
+}
+
+.fp-knob {
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.12), 0 3px 10px -2px rgba(0, 0, 0, 0.5),
+    0 0 0 6px rgba(237, 85, 100, 0.18);
+}
+
+/* like button when active: warm glow */
+#fpLike.on,
+#miniLike.liked {
+  color: #ff8a9b;
+  background: rgba(237, 85, 100, 0.18);
+  border-color: rgba(237, 85, 100, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 0 22px -4px rgba(237, 85, 100, 0.75);
+}
+
+/* ------------------------------------------------------------
+   scrollbar + selection, to finish the polish
+   ------------------------------------------------------------ */
+::selection {
+  background: rgba(237, 85, 100, 0.34);
+}
+
+.main-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--glass-tint), 0.2) transparent;
+}
+
+.main-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+
+.main-scroll::-webkit-scrollbar-thumb {
+  background: rgba(var(--glass-tint), 0.16);
+  border-radius: 99px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+.main-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--glass-tint), 0.28);
+  background-clip: content-box;
+}
+
+/* fallback: if the browser can't blur, keep panels readable */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .dock,
+  .mini,
+  .appbar,
+  .searchbar,
+  .chip,
+  .qp-card,
+  .row,
+  .fp-top {
+    background: var(--surface-container);
+  }
+  .fp-mask {
+    background: rgba(10, 6, 8, 0.92);
+  }
+}
+
+/* ------------------------------------------------------------
+   seed shelves + skeleton cards
+   ------------------------------------------------------------ */
+.seed-shelf + .seed-shelf {
+  margin-top: var(--section-gap);
+}
+
+/* fade the strip edge instead of hard-cutting cards at the viewport */
+.quickpicks {
+  -webkit-mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 48px), transparent 100%);
+  mask-image: linear-gradient(to right, #000 0, #000 calc(100% - 48px), transparent 100%);
+}
+
+.qp-sk {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0 0 14px;
+  pointer-events: none;
+}
+
+.sk-art {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+}
+
+.sk-line {
+  height: 12px;
+  border-radius: 99px;
+  margin: 0 14px;
+}
+
+.sk-line.short {
+  width: 52%;
+}
+
+/* ------------------------------------------------------------
+   bottom sheets: lyrics + equalizer
+   ------------------------------------------------------------ */
+.sheet {
+  position: fixed;
+  inset: 0;
+  /* must sit above .fp (z-index 200) or the full player hides the sheet */
+  z-index: 300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.sheet.open {
+  pointer-events: auto;
+}
+
+.sheet-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity var(--dur-med) var(--ease-expressive);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  /* a closed sheet must never swallow clicks meant for the app behind it */
+  pointer-events: none;
+}
+
+[data-theme='light'] .sheet-backdrop {
+  background: rgba(60, 30, 34, 0.28);
+}
+
+.sheet.open .sheet-backdrop {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sheet-panel {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: 82dvh;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+  border-radius: 30px 30px 0 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(var(--glass-tint), calc(var(--glass-fill-strong) + 0.04)),
+    rgba(var(--glass-tint), var(--glass-fill))
+  );
+  border: 1px solid rgba(var(--glass-tint), var(--glass-border));
+  border-bottom: none;
+  box-shadow: 0 -24px 70px -20px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, var(--glass-highlight));
+  -webkit-backdrop-filter: blur(34px) saturate(190%);
+  backdrop-filter: blur(34px) saturate(190%);
+  transform: translateY(100%);
+  will-change: transform;
+  transition: transform 280ms var(--ease-expressive);
+}
+
+[data-theme='light'] .sheet-panel {
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.86), rgba(255, 250, 250, 0.72));
+  border-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 -24px 70px -24px rgba(90, 40, 44, 0.35), inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+.sheet.open .sheet-panel {
+  transform: translateY(0);
+}
+
+.sheet-grab {
+  width: 40px;
+  height: 4px;
+  border-radius: 99px;
+  margin: 4px auto 10px;
+  background: rgba(var(--glass-tint), 0.28);
+  flex: none;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex: none;
+}
+
+.sheet-title {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* ---------- lyrics ---------- */
+.lyrics-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px 4px 14px;
+  font-size: 16.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  color: var(--on-surface);
+  scrollbar-width: none;
+  /* fade the top and bottom edges so lines dissolve instead of
+     getting sliced by the panel edge */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 38px,
+    #000 calc(100% - 38px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 38px,
+    #000 calc(100% - 38px),
+    transparent 100%
+  );
+}
+
+.lyrics-body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* section break — silence between verses, kept as real rhythm */
+.lyrics-gap {
+  height: 14px;
+}
+
+/* upcoming lines: readable but recessed. Opacity is kept high enough that
+   the text clears WCAG AA (4.5:1) — hierarchy comes from weight and colour,
+   not from making the words disappear. */
+.lyrics-body .lyrics-line {
+  position: relative;
+  padding: 5px 10px;
+  margin: 1px 0;
+  border-radius: 10px;
+  opacity: 0.78;
+  font-weight: 500;
+  letter-spacing: -0.003em;
+  transform-origin: left center;
+  transition: color 260ms var(--ease-expressive), opacity 260ms var(--ease-expressive),
+    font-weight 120ms linear, transform 260ms var(--ease-expressive),
+    background-color 260ms var(--ease-expressive);
+}
+
+/* already sung: quieter still, so the active line is the brightest thing */
+.lyrics-body .lyrics-line.sung {
+  opacity: 0.55;
+  font-weight: 400;
+}
+
+/* the line being sung right now */
+.lyrics-body .lyrics-line.current {
+  opacity: 1;
+  font-weight: 700;
+  color: var(--on-surface);
+  background: rgba(var(--glass-tint), 0.1);
+  /* the lift is horizontal-only and tiny: a full scale would push the line
+     past the pane edge on narrow screens and create a sideways scroll */
+  transform: translateX(2px);
+}
+
+/* a rose rule on the left marks exactly where you are — colour alone
+   is not enough of a cue, and it survives the light theme */
+.lyrics-body .lyrics-line.current::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 18%;
+  bottom: 18%;
+  width: 3px;
+  border-radius: 99px;
+  background: var(--primary);
+  box-shadow: 0 0 10px -1px var(--primary);
+}
+
+[data-theme='light'] .lyrics-body {
+  color: #3a2a2c;
+}
+
+[data-theme='light'] .lyrics-body .lyrics-line {
+  opacity: 0.9;
+  color: #4a3235;
+}
+
+[data-theme='light'] .lyrics-body .lyrics-line.sung {
+  opacity: 0.85;
+  color: #5c4346;
+}
+
+[data-theme='light'] .lyrics-body .lyrics-line.current {
+  opacity: 1;
+  color: #a51f34;
+  background: rgba(200, 53, 74, 0.09);
+}
+
+.lyrics-loading {
+  display: grid;
+  place-items: center;
+  padding: 48px 0;
+}
+
+.lyrics-foot {
+  flex: none;
+  font-size: 11px;
+  opacity: 0.5;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(var(--glass-tint), 0.1);
+}
+
+.lyrics-empty {
+  text-align: center;
+  padding: 40px 0;
+  opacity: 0.65;
+  font-size: 14px;
+}
+
+/* ---------- equalizer ---------- */
+.eq-presets {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 2px 0 14px;
+  flex: none;
+  scrollbar-width: none;
+}
+
+.eq-presets::-webkit-scrollbar {
+  display: none;
+}
+
+.eq-bands {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 18px 4px 8px;
+  flex: none;
+  height: 210px;
+}
+
+.eq-band {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  position: relative;
+}
+
+/* the visible channel behind the thumb */
+.eq-band::before {
+  content: '';
+  position: absolute;
+  top: 22px;
+  bottom: 30px;
+  left: 50%;
+  width: 6px;
+  transform: translateX(-50%);
+  border-radius: 99px;
+  background: rgba(var(--glass-tint), 0.16);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+  pointer-events: none;
+}
+
+[data-theme='light'] .eq-band::before {
+  background: rgba(90, 40, 44, 0.16);
+}
+
+/* vertical slider: writing-mode keeps keyboard + touch working natively */
+.eq-band input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 24px;
+  height: 100%;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+}
+
+.eq-band input[type='range']::-webkit-slider-runnable-track {
+  width: 6px;
+  height: 100%;
+  border-radius: 99px;
+  background: transparent;
+}
+
+.eq-band input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  margin-left: -7px;
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.55), 0 0 0 4px rgba(237, 85, 100, 0.22);
+}
+
+.eq-band input[type='range']:active::-webkit-slider-thumb {
+  box-shadow: 0 2px 10px -1px rgba(0, 0, 0, 0.6), 0 0 0 8px rgba(237, 85, 100, 0.3);
+}
+
+.eq-band input[type='range']::-moz-range-track {
+  width: 6px;
+  border-radius: 99px;
+  background: transparent;
+}
+
+.eq-band input[type='range']::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.55), 0 0 0 4px rgba(237, 85, 100, 0.22);
+}
+
+.eq-band-label,
+.eq-band-gain {
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  flex: none;
+}
+
+.eq-band-label {
+  opacity: 0.6;
+}
+
+.eq-band-gain {
+  opacity: 0.85;
+  min-height: 14px;
+}
+
+.eq-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  flex: none;
+}
+
+.eq-label {
+  font-size: 13px;
+  width: 88px;
+  flex: none;
+  opacity: 0.75;
+}
+
+.eq-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 6px;
+  border-radius: 99px;
+  background: rgba(var(--glass-tint), 0.16);
+  outline: none;
+}
+
+.eq-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(237, 85, 100, 0.22);
+  cursor: pointer;
+}
+
+.eq-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 2px 8px -1px rgba(0, 0, 0, 0.5), 0 0 0 4px rgba(237, 85, 100, 0.22);
+  cursor: pointer;
+}
+
+.eq-reset {
+  margin-top: 12px;
+  align-self: flex-start;
+  flex: none;
+}
+
+.eq-note {
+  font-size: 11px;
+  opacity: 0.5;
+  margin: 12px 0 0;
+  line-height: 1.6;
+}
+
+@media (max-width: 380px) {
+  .eq-label {
+    width: 70px;
+    font-size: 12px;
+  }
+  .eq-bands {
+    height: 180px;
+  }
+}
+
+/* ------------------------------------------------------------
+   desktop rail: glass instead of the flat panel it inherited
+   ------------------------------------------------------------ */
+@media (min-width: 1024px) {
+  .dock {
+    border-right: 1px solid rgba(var(--glass-tint), calc(var(--glass-border) * 0.8));
+    background: linear-gradient(
+      to bottom,
+      rgba(var(--glass-tint), calc(var(--glass-fill) + 0.02)),
+      rgba(var(--glass-tint), calc(var(--glass-fill) * 0.45))
+    );
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    box-shadow: none;
+  }
+
+  /* a full-height rail doesn't need the floating halo */
+  .dock::after {
+    display: none;
+  }
+
+  .nav {
+    background: transparent;
+  }
+
+  .nav-item {
+    border: 1px solid transparent;
+    transition: background var(--dur-fast) var(--ease-expressive),
+      border-color var(--dur-fast) var(--ease-expressive);
+  }
+
+  .nav-item:hover {
+    background: rgba(var(--glass-tint), var(--glass-fill));
+    border-color: rgba(var(--glass-tint), calc(var(--glass-border) * 0.7));
+  }
+
+  .nav-item.active {
+    background: rgba(237, 85, 100, 0.16);
+    color: var(--on-surface);
+    border-color: rgba(237, 85, 100, 0.32);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  }
+
+  [data-theme='light'] .nav-item.active {
+    background: rgba(237, 85, 100, 0.13);
+  }
+
+  .mini {
+    border-color: rgba(var(--glass-tint), calc(var(--glass-border) * 0.8));
+    background: rgba(var(--glass-tint), 0.05);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 26px -16px rgba(0, 0, 0, 0.6);
+  }
+}
+
+
+
+
+
+
+
+

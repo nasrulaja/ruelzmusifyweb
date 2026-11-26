@@ -1,0 +1,117 @@
+/* ============================================================
+   RuelzMusify Web — design tokens
+   Derived from the Android app:
+     DefaultThemeColor = #ED5564           (ui/theme/Theme.kt)
+     NavigationBarHeight 78dp / MaxWidth 420dp  (constants/Dimensions.kt)
+     MiniPlayerHeight 70dp, junction radius 12dp, outer 28dp, standalone 32dp
+     ListThumbnail 56dp r10 / Grid 128dp r16
+   ============================================================ */
+
+:root {
+  /* --- seed: #ED5564, tonal palette approximated to Material 3 --- */
+  --primary: #ed5564;
+  --on-primary: #ffffff;
+  --primary-container: #ffd9dc;
+  --on-primary-container: #40000a;
+
+  --secondary: #775656;
+  --on-secondary: #ffffff;
+  --secondary-container: #ffdada;
+  --on-secondary-container: #2c1516;
+
+  --tertiary: #77574e;
+  --on-tertiary: #ffffff;
+  --tertiary-container: #ffdbd1;
+  --on-tertiary-container: #2c160f;
+
+  --error: #ba1a1a;
+
+  /* neutrals — warm, tinted by the rose seed */
+  --surface: #fff8f7;
+  --on-surface: #221919;
+  --surface-variant: #f4dddd;
+  --on-surface-variant: #524343;
+  --outline: #857372;
+  --outline-variant: #d7c1c1;
+
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #fff0ef;
+  --surface-container: #fbeae9;
+  --surface-container-high: #f5e4e3;
+  --surface-container-highest: #efdedd;
+
+  /* --- layout, straight from Dimensions.kt --- */
+  --nav-height: 78px;
+  --nav-max-width: 420px;
+  --nav-h-padding: 12px;
+  --nav-b-padding: 10px;
+  --mini-height: 70px;
+  --mini-bottom-spacing: 4px;
+  --radius-standalone: 32px;
+  --radius-outer: 28px;
+  --radius-junction: 12px;
+  --appbar-height: 64px;
+
+  --thumb-list: 56px;
+  --thumb-list-radius: 10px;
+  --thumb-grid: 128px;
+  --thumb-grid-radius: 16px;
+  --album-thumb: 144px;
+
+  --list-item-height: 72px;
+  --suggestion-height: 56px;
+
+  --section-gap: 28px;
+  --feed-max: 1200px;
+
+  --ease-expressive: cubic-bezier(0.2, 0, 0, 1);
+  --dur-fast: 150ms;
+  --dur-med: 300ms;
+  --dur-slow: 450ms;
+
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+
+/* dark theme — rose-tinted neutrals, matches Material3 dark scheme */
+[data-theme='dark'] {
+  --primary: #ffb3b8;
+  --on-primary: #67001a;
+  --primary-container: #93002a;
+  --on-primary-container: #ffd9dc;
+
+  --secondary: #e7bdbe;
+  --on-secondary: #44292a;
+  --secondary-container: #5c3f40;
+  --on-secondary-container: #ffdada;
+
+  --tertiary: #e7beae;
+  --on-tertiary: #442a21;
+  --tertiary-container: #5d4035;
+  --on-tertiary-container: #ffdbd1;
+
+  --error: #ffb4ab;
+
+  --surface: #1a1113;
+  --on-surface: #f1dede;
+  --surface-variant: #524343;
+  --on-surface-variant: #d7c1c1;
+  --outline: #a08c8c;
+  --outline-variant: #524343;
+
+  --surface-container-lowest: #140c0e;
+  --surface-container-low: #22191b;
+  --surface-container: #261d1f;
+  --surface-container-high: #312829;
+  --surface-container-highest: #3c3234;
+}
+
+/* pure-black (PureBlackKey preference in the app) */
+[data-theme='dark'][data-pure-black='true'] {
+  --surface: #000000;
+  --surface-container-lowest: #000000;
+  --surface-container-low: #0a0a0a;
+  --surface-container: #101010;
+  --surface-container-high: #171717;
+  --surface-container-highest: #1f1f1f;
+}
